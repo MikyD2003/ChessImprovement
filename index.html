@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Road to 2000</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eceff6; --surface:#ffffff; --ink:#151b2e; --muted:#5a6479; --line:#d5dbe8;
+  --accent:#2f5bea; --on:#ffffff; --win:#12805f; --loss:#c43d53; --draw:#8a6d1a;
+  --sq-a:#e3e8f5; --sq-b:#c2cce3; color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1424; --surface:#171e35; --ink:#e8ecf8; --muted:#9aa5c3; --line:#2a3358;
+    --accent:#7ea2ff; --on:#0f1424; --win:#4fd1a5; --loss:#ff7a8f; --draw:#e6c35c;
+    --sq-a:#222b4a; --sq-b:#2d3962; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1424; --surface:#171e35; --ink:#e8ecf8; --muted:#9aa5c3; --line:#2a3358;
+  --accent:#7ea2ff; --on:#0f1424; --win:#4fd1a5; --loss:#ff7a8f; --draw:#e6c35c;
+  --sq-a:#222b4a; --sq-b:#2d3962; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1040px;margin:0 auto;padding:22px 16px 56px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{margin:0;font-size:clamp(2.2rem,8vw,4rem);line-height:1;font-weight:800;letter-spacing:-0.03em}
+.sub{margin:8px 0 0;color:var(--muted);max-width:60ch}
+h2{margin:0 0 10px;font-size:1.25rem;font-weight:700;letter-spacing:-0.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:10px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on);border-color:var(--accent);font-weight:600}
+.btn.danger{color:var(--loss)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* progress rail: the one bold element */
+.progress{margin:28px 0 8px}
+.now{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.now .big{font-size:clamp(3rem,14vw,6.5rem);font-weight:800;line-height:.95;letter-spacing:-0.04em}
+.now .togo{color:var(--muted);font-size:1.1rem}
+.rail{position:relative;height:36px;margin-top:16px;border-radius:8px;overflow:hidden;
+  background-color:var(--sq-a);
+  background-image:conic-gradient(var(--sq-b) 25%,transparent 0 50%,var(--sq-b) 0 75%,transparent 0);
+  background-size:36px 36px;border:1px solid var(--line)}
+.rail .fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--accent);opacity:.8;transition:width .6s ease}
+.rail-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;margin-top:6px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:24px}
+section{margin-top:34px}
+.grid2{display:grid;grid-template-columns:1fr;gap:28px}
+@media (min-width:820px){.grid2{grid-template-columns:1.3fr 1fr}}
+
+/* form */
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.92rem;color:var(--muted)}
+.f input,.f select,.f textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;color:var(--ink);width:100%}
+.seg{position:relative;display:flex;gap:6px;flex-wrap:wrap}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:8px 16px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:var(--bg);color:var(--ink)}
+.seg input:checked+label{background:var(--accent);color:var(--on);border-color:var(--accent);font-weight:600}
+.seg input.w:checked+label{background:var(--win);border-color:var(--win)}
+.seg input.l:checked+label{background:var(--loss);border-color:var(--loss)}
+.seg input.d:checked+label{background:var(--draw);border-color:var(--draw)}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+.group-title{font-size:.92rem;color:var(--muted);margin-bottom:6px}
+.actions{display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.msg{color:var(--loss);font-size:.95rem}
+.ok{color:var(--win)}
+
+/* stats */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{padding:14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.tile .v{font-size:1.9rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1}
+.tile .k{color:var(--muted);font-size:.9rem}
+.w{color:var(--win)} .l{color:var(--loss)} .d{color:var(--draw)}
+
+.chartbox svg{width:100%;height:auto;display:block}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:150px 1fr 28px;gap:10px;align-items:center;font-size:.95rem}
+.bar .track{height:12px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar .track i{display:block;height:100%;background:var(--loss)}
+.insight{margin-top:14px;padding:12px 14px;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 10px 10px 0}
+.empty{color:var(--muted);margin:6px 0}
+
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.95rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.note{max-width:260px;color:var(--muted)}
+.chip{display:inline-block;min-width:28px;text-align:center;padding:1px 8px;border-radius:999px;font-weight:700;font-size:.85rem;color:var(--on)}
+.chip.w{background:var(--win);color:var(--on)} .chip.l{background:var(--loss);color:var(--on)} .chip.d{background:var(--draw);color:var(--on)}
+.small{font-size:.9rem;color:var(--muted)}
+textarea.box{width:100%;min-height:120px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+@media (max-width:520px){.bar{grid-template-columns:110px 1fr 24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1 id="title">Road to 2000</h1>
+      <p class="sub">Lichess Rapid 10+5. Log each rated game, review each loss, and find the mistake that costs you most.</p>
+    </div>
+    <button class="btn" id="theme" type="button" aria-label="Switch light or dark theme">Theme</button>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="panel" id="addpanel">
+    <h2>Log a game</h2>
+    <form id="gform" autocomplete="off" novalidate>
+      <div class="fields">
+        <div>
+          <div class="group-title">Result</div>
+          <div class="seg" role="radiogroup" aria-label="Result">
+            <input class="w" type="radio" name="result" id="r-w" value="w" checked><label for="r-w">Win</label>
+            <input class="l" type="radio" name="result" id="r-l" value="l"><label for="r-l">Loss</label>
+            <input class="d" type="radio" name="result" id="r-d" value="d"><label for="r-d">Draw</label>
+          </div>
+        </div>
+        <div>
+          <div class="group-title">Your color</div>
+          <div class="seg" role="radiogroup" aria-label="Your color">
+            <input type="radio" name="color" id="c-w" value="white" checked><label for="c-w">White</label>
+            <input type="radio" name="color" id="c-b" value="black"><label for="c-b">Black</label>
+          </div>
+        </div>
+      </div>
+      <div class="fields">
+        <label class="f">Date<input type="date" id="f-date"></label>
+        <label class="f">Rating after the game<input type="number" id="f-after" inputmode="numeric" min="100" max="3500" placeholder="1310"></label>
+        <label class="f">Opening<input type="text" id="f-open" list="openings" placeholder="Queen's Gambit"></label>
+        <label class="f">Main reason
+          <select id="f-reason">
+            <option value="">Not needed (win)</option>
+            <option value="tactic">Missed tactic or hung piece</option>
+            <option value="opening">Opening trouble</option>
+            <option value="plan">No middlegame plan</option>
+            <option value="endgame">Endgame</option>
+            <option value="time">Time trouble</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label class="f">Seconds left at the end<input type="number" id="f-time" inputmode="numeric" min="0" max="600" placeholder="45"></label>
+        <label class="f">One sentence on the key mistake<input type="text" id="f-note" maxlength="160" placeholder="Moved the knight and left a pawn hanging"></label>
+      </div>
+      <datalist id="openings"><option value="Queen's Gambit"><option value="Réti Opening"></datalist>
+      <div class="actions">
+        <button class="btn primary" type="submit">Save game</button>
+        <span id="formmsg" role="status" class="msg"></span>
+      </div>
+    </form>
+  </div>
+
+  <section id="report"></section>
+
+  <section>
+    <h2>Settings</h2>
+    <div class="fields">
+      <label class="f">Rating before your first logged game<input type="number" id="s-start" inputmode="numeric" min="100" max="3500"></label>
+      <label class="f">Goal rating<input type="number" id="s-goal" inputmode="numeric" min="100" max="3500"></label>
+      <label class="f">Daily games open right now<input type="number" id="s-daily" inputmode="numeric" min="0" max="99"></label>
+    </div>
+    <p class="small" id="dailymsg" role="status"></p>
+  </section>
+
+  <section>
+    <h2>Backup</h2>
+    <p class="small">Your data lives in this browser only. Copy a backup now and then, and paste it back here to restore it on another device.</p>
+    <div class="row">
+      <button class="btn" type="button" id="b-json">Show backup text</button>
+      <button class="btn" type="button" id="b-csv">Show CSV for a spreadsheet</button>
+      <button class="btn" type="button" id="b-copy">Copy text</button>
+      <button class="btn danger" type="button" id="b-import">Restore from pasted backup</button>
+    </div>
+    <textarea class="box" id="b-box" aria-label="Backup text" spellcheck="false"></textarea>
+    <p class="small" id="b-msg" role="status"></p>
+  </section>
+</div>
+
+<script>
+(function(){
+  var KEY='road2000.v1', THEMEKEY='road2000.theme';
+  var S={settings:{start:1300,goal:2000,daily:0},games:[]};
+  var REASONS={tactic:'Missed tactic or hung piece',opening:'Opening trouble',plan:'No middlegame plan',endgame:'Endgame',time:'Time trouble',other:'Other'};
+  var ADVICE={
+    tactic:'Missed tactics cost you the most games. Keep the daily puzzles. Before each move, check what your opponent can capture or attack.',
+    opening:'Your openings cost you games. Pick one line for each opening you play. Learn the plans, not only the moves.',
+    plan:'You reach the middlegame without a plan. After the opening, name one target or one weak square before you move.',
+    endgame:'Endgames decide too many of your games. Study one basic ending each week. Start with king and pawn endings, then rook endings.',
+    time:'Time trouble is your main leak. Spend less time on the first 10 moves. Set a time budget for each middlegame move.',
+    other:'Most losses sit under "Other". Review them again and give each one a more exact reason.'
+  };
+  var $=function(id){return document.getElementById(id);};
+  var RES={w:'Win',l:'Loss',d:'Draw'};
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function pad(n){return n<10?'0'+n:''+n;}
+  function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  function today(){return ymd(new Date());}
+
+  function load(){
+    try{
+      var raw=localStorage.getItem(KEY);
+      if(raw){
+        var p=JSON.parse(raw);
+        if(p&&Array.isArray(p.games)){S.games=p.games;}
+        if(p&&p.settings){S.settings=Object.assign(S.settings,p.settings);}
+      }
+    }catch(e){}
+  }
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+  function sorted(){
+    return S.games.slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:a.id-b.id;});
+  }
+  function derive(){
+    var prev=S.settings.start;
+    var rows=sorted().map(function(g){var r=Object.assign({},g,{delta:g.after-prev});prev=g.after;return r;});
+    return {rows:rows,current:rows.length?rows[rows.length-1].after:S.settings.start};
+  }
+
+  /* ---------- progress ---------- */
+  function renderProgress(D){
+    var st=S.settings, cur=D.current;
+    var span=st.goal-st.start;
+    var frac=span>0?Math.max(0,Math.min(1,(cur-st.start)/span)):(cur>=st.goal?1:0);
+    var togo=st.goal-cur;
+    $('title').textContent='Road to '+st.goal;
+    document.title='Road to '+st.goal;
+    $('progress').innerHTML=
+      '<div class="now"><div class="big">'+cur+'</div><div class="togo">'+
+      (togo>0?togo+' points to go':'Goal reached')+'</div></div>'+
+      '<div class="rail" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(frac*100)+'" aria-label="Progress to goal rating"><div class="fill" style="width:'+(frac*100).toFixed(1)+'%"></div></div>'+
+      '<div class="rail-labels"><span>Start '+st.start+'</span><span>'+Math.round(frac*100)+'% of the way</span><span>Goal '+st.goal+'</span></div>';
+  }
+
+  /* ---------- chart ---------- */
+  function chart(D){
+    var st=S.settings;
+    var pts=[{r:st.start,res:null}].concat(D.rows.map(function(x){return {r:x.after,res:x.result};}));
+    var view=pts.slice(-61);
+    if(view.length<2){return '<p class="empty">Save your first game to start the rating line.</p>';}
+    var W=640,H=220,L=44,R=16,T=18,B=26;
+    var lo=Infinity,hi=-Infinity;
+    view.forEach(function(p){if(p.r<lo)lo=p.r;if(p.r>hi)hi=p.r;});
+    var padv=Math.max(20,Math.round((hi-lo)*0.15));
+    lo-=padv;hi+=padv;
+    var x=function(i){return L+i*(W-L-R)/(view.length-1);};
+    var y=function(v){return T+(hi-v)*(H-T-B)/(hi-lo);};
+    var d=view.map(function(p,i){return (i?'L':'M')+x(i).toFixed(1)+' '+y(p.r).toFixed(1);}).join(' ');
+    var ticks=[lo,(lo+hi)/2,hi].map(function(v){return Math.round(v);});
+    var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Rating after each game">';
+    ticks.forEach(function(v){
+      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'" style="stroke:var(--line)" stroke-width="1"/>';
+      s+='<text x="'+(L-8)+'" y="'+(y(v)+4).toFixed(1)+'" text-anchor="end" font-size="12" style="fill:var(--muted)">'+v+'</text>';
+    });
+    s+='<path d="'+d+'" fill="none" style="stroke:var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    view.forEach(function(p,i){
+      var col=p.res==='w'?'var(--win)':p.res==='l'?'var(--loss)':p.res==='d'?'var(--draw)':'var(--muted)';
+      s+='<circle cx="'+x(i).toFixed(1)+'" cy="'+y(p.r).toFixed(1)+'" r="'+(i===view.length-1?5:3.5)+'" style="fill:'+col+'"/>';
+    });
+    var last=view[view.length-1];
+    s+='<text x="'+Math.min(x(view.length-1),W-R-14).toFixed(1)+'" y="'+(y(last.r)-10).toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--ink)">'+last.r+'</text>';
+    s+='<text x="'+L+'" y="'+(H-6)+'" font-size="12" style="fill:var(--muted)">start</text>';
+    s+='<text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end" font-size="12" style="fill:var(--muted)">latest game</text>';
+    return s+'</svg>';
+  }
+
+  /* ---------- report ---------- */
+  function weekStart(){
+    var d=new Date();var day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return ymd(d);
+  }
+  function record(list){
+    var w=0,l=0,d=0;list.forEach(function(g){if(g.result==='w')w++;else if(g.result==='l')l++;else d++;});
+    return {w:w,l:l,d:d,n:list.length,pct:list.length?Math.round(w/list.length*100):0};
+  }
+  function renderReport(D){
+    var rows=D.rows, rec=record(rows), st=S.settings;
+    var peak=rows.length?Math.max.apply(null,rows.map(function(g){return g.after;})):st.start;
+    var ws=weekStart();
+    var thisWeek=rows.filter(function(g){return g.date>=ws;}).length;
+    var h='';
+
+    h+='<div class="tiles">'+
+      '<div class="tile"><div class="v">'+D.current+'</div><div class="k">Rating now (peak '+peak+')</div></div>'+
+      '<div class="tile"><div class="v">'+rec.n+'</div><div class="k"><span class="w">'+rec.w+' W</span> / <span class="l">'+rec.l+' L</span> / <span class="d">'+rec.d+' D</span></div></div>'+
+      '<div class="tile"><div class="v">'+rec.pct+'%</div><div class="k">Win rate</div></div>'+
+      '<div class="tile"><div class="v">'+thisWeek+'</div><div class="k">Games this week (target 4 to 6)</div></div>'+
+      '</div>';
+
+    h+='<section><h2>Rating line</h2><div class="chartbox">'+chart(D)+'</div></section>';
+
+    /* 28-day check */
+    var cut=new Date();cut.setDate(cut.getDate()-28);var cutS=ymd(cut);
+    var firstIdx=-1;
+    rows.forEach(function(g,i){if(firstIdx<0&&g.date>=cutS)firstIdx=i;});
+    var check='';
+    if(firstIdx<0){check='No games in the last 28 days. Play your 4 to 6 games this week.';}
+    else{
+      var before=firstIdx>0?rows[firstIdx-1].after:st.start;
+      var win=rows.slice(firstIdx);
+      var ch=win[win.length-1].after-before;
+      var wr=record(win);
+      check='Last 28 days: '+win.length+' games, '+wr.w+' W / '+wr.l+' L / '+wr.d+' D, rating change <strong class="'+(ch>=0?'w':'l')+'">'+(ch>=0?'+':'')+ch+'</strong>.';
+    }
+    h+='<section><h2>4-week check</h2><p>'+check+'</p></section>';
+
+    /* leaks */
+    var losses=rows.filter(function(g){return g.result==='l';});
+    var counts={};losses.forEach(function(g){if(g.reason){counts[g.reason]=(counts[g.reason]||0)+1;}});
+    var keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+    var leak='<h2>Why you lose</h2>';
+    if(!keys.length){leak+='<p class="empty">No losses with a reason yet.</p>';}
+    else{
+      var max=counts[keys[0]];
+      leak+='<div class="bars">'+keys.map(function(k){
+        return '<div class="bar"><span>'+esc(REASONS[k]||k)+'</span><span class="track"><i style="width:'+(counts[k]/max*100)+'%"></i></span><span>'+counts[k]+'</span></div>';
+      }).join('')+'</div>';
+      var total=keys.reduce(function(a,k){return a+counts[k];},0);
+      if(total>=5){leak+='<div class="insight">'+esc(ADVICE[keys[0]]||'')+'</div>';}
+      else{leak+='<p class="small">Log '+(5-total)+' more '+(5-total===1?'loss':'losses')+' with a reason to see advice.</p>';}
+    }
+    var timed=losses.filter(function(g){return typeof g.time==='number';});
+    if(timed.length){
+      var low=timed.filter(function(g){return g.time<30;}).length;
+      leak+='<p class="small">Lost with under 30 seconds left: '+low+' of '+timed.length+' timed losses.</p>';
+    }
+
+    /* color + openings */
+    var wh=record(rows.filter(function(g){return g.color==='white';}));
+    var bl=record(rows.filter(function(g){return g.color==='black';}));
+    var by={};
+    rows.forEach(function(g){var k=(g.opening||'').trim();if(!k)return;(by[k]=by[k]||[]).push(g);});
+    var ok=Object.keys(by).sort(function(a,b){return by[b].length-by[a].length;}).slice(0,8);
+    var side='<h2>By color and opening</h2>'+
+      '<p>White: '+wh.n+' games, '+wh.pct+'% wins.<br>Black: '+bl.n+' games, '+bl.pct+'% wins.</p>';
+    if(ok.length){
+      side+='<div class="scroll"><table style="min-width:0"><thead><tr><th>Opening</th><th>Games</th><th>W / L / D</th><th>Win %</th></tr></thead><tbody>'+
+        ok.map(function(k){var r=record(by[k]);return '<tr><td>'+esc(k)+'</td><td>'+r.n+'</td><td>'+r.w+' / '+r.l+' / '+r.d+'</td><td>'+r.pct+'%</td></tr>';}).join('')+
+        '</tbody></table></div>';
+    }else{side+='<p class="empty">Add an opening name to see results by opening.</p>';}
+
+    h+='<section><div class="grid2"><div>'+leak+'</div><div>'+side+'</div></div></section>';
+
+    /* log */
+    h+='<section><h2>Game log</h2>';
+    if(!rows.length){h+='<p class="empty">No games yet. Save one above.</p>';}
+    else{
+      h+='<div class="scroll"><table><thead><tr><th>Date</th><th>Result</th><th>Color</th><th>Opening</th><th>Rating</th><th>Reason</th><th>Time left</th><th>Key mistake</th><th></th></tr></thead><tbody>'+
+        rows.slice().reverse().map(function(g){
+          var dl=g.delta>=0?'+'+g.delta:''+g.delta;
+          return '<tr><td>'+esc(g.date)+'</td>'+
+            '<td><span class="chip '+g.result+'">'+(g.result==='w'?'W':g.result==='l'?'L':'D')+'</span></td>'+
+            '<td>'+esc(g.color)+'</td><td>'+esc(g.opening)+'</td>'+
+            '<td>'+g.after+' <span class="small '+(g.delta>=0?'w':'l')+'">'+dl+'</span></td>'+
+            '<td>'+esc(REASONS[g.reason]||'')+'</td>'+
+            '<td>'+(typeof g.time==='number'?g.time+'s':'')+'</td>'+
+            '<td class="note">'+esc(g.note)+'</td>'+
+            '<td><button class="btn" type="button" data-del="'+g.id+'" aria-label="Delete game from '+esc(g.date)+'">Delete</button></td></tr>';
+        }).join('')+'</tbody></table></div>';
+    }
+    h+='</section>';
+    $('report').innerHTML=h;
+  }
+
+  function renderDaily(){
+    var n=S.settings.daily||0, el=$('dailymsg');
+    if(n>2){el.className='small l';el.textContent='You have '+n+' Daily games open. The cap is 2. Finish or resign games before you accept new ones.';}
+    else{el.className='small';el.textContent='Daily games open: '+n+'. Within the cap of 2.';}
+  }
+
+  function render(){
+    var D=derive();
+    renderProgress(D);
+    renderReport(D);
+    renderDaily();
+    var ph=D.current?String(D.current):'';
+    $('f-after').placeholder=ph;
+  }
+
+  /* ---------- form ---------- */
+  function radio(name){var e=document.querySelector('input[name="'+name+'"]:checked');return e?e.value:'';}
+  $('gform').addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var msg=$('formmsg');msg.className='msg';
+    var date=$('f-date').value||today();
+    var after=parseInt($('f-after').value,10);
+    var result=radio('result'), color=radio('color'), reason=$('f-reason').value;
+    if(!(after>=100&&after<=3500)){msg.textContent='Enter your rating after the game, from 100 to 3500.';return;}
+    if(result==='l'&&!reason){msg.textContent='Pick a main reason for the loss. It feeds the "Why you lose" chart.';return;}
+    var t=$('f-time').value===''?null:parseInt($('f-time').value,10);
+    var g={id:Date.now()+Math.floor(Math.random()*1000),date:date,result:result,color:color,
+      opening:$('f-open').value.trim().slice(0,60),after:after,reason:reason,
+      time:(t!==null&&t>=0)?t:null,note:$('f-note').value.trim().slice(0,160)};
+    S.games.push(g);save();
+    $('f-after').value='';$('f-time').value='';$('f-note').value='';$('f-reason').value='';
+    msg.className='msg ok';msg.textContent='Game saved.';
+    render();
+    $('f-after').focus();
+  });
+
+  /* ---------- delete (two clicks) ---------- */
+  $('report').addEventListener('click',function(ev){
+    var b=ev.target.closest&&ev.target.closest('[data-del]');
+    if(!b)return;
+    if(b.dataset.armed){
+      var id=+b.dataset.del;
+      S.games=S.games.filter(function(g){return g.id!==id;});save();render();return;
+    }
+    b.dataset.armed='1';b.textContent='Sure?';b.classList.add('danger');
+    setTimeout(function(){if(b.isConnected){delete b.dataset.armed;b.textContent='Delete';b.classList.remove('danger');}},3000);
+  });
+
+  /* ---------- settings ---------- */
+  function bindSetting(id,key,min,max){
+    $(id).value=S.settings[key];
+    $(id).addEventListener('change',function(){
+      var v=parseInt($(id).value,10);
+      if(!(v>=min&&v<=max)){$(id).value=S.settings[key];return;}
+      S.settings[key]=v;save();render();
+    });
+  }
+
+  /* ---------- backup ---------- */
+  function csv(){
+    var h=['date','result','color','opening','rating_after','reason','seconds_left','note'];
+    var q=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';};
+    return [h.join(',')].concat(sorted().map(function(g){
+      return [g.date,RES[g.result],g.color,g.opening,g.after,g.reason,g.time,g.note].map(q).join(',');
+    })).join('\n');
+  }
+  function bmsg(t,bad){var m=$('b-msg');m.textContent=t;m.className='small '+(bad?'l':'w');}
+  $('b-json').addEventListener('click',function(){$('b-box').value=JSON.stringify(S);bmsg('Backup text ready. Copy it and keep it somewhere safe.');});
+  $('b-csv').addEventListener('click',function(){$('b-box').value=csv();bmsg('CSV ready. Paste it into a spreadsheet.');});
+  $('b-copy').addEventListener('click',function(){
+    var box=$('b-box');box.focus();box.select();
+    var done=false;
+    try{done=document.execCommand('copy');}catch(e){}
+    if(!done&&navigator.clipboard){navigator.clipboard.writeText(box.value).then(function(){bmsg('Copied.');},function(){bmsg('Copy failed. Select the text and copy it by hand.',true);});return;}
+    bmsg(done?'Copied.':'Copy failed. Select the text and copy it by hand.',!done);
+  });
+  $('b-import').addEventListener('click',function(){
+    var b=$('b-import');
+    if(!b.dataset.armed){
+      b.dataset.armed='1';b.textContent='Click again to replace all data';
+      setTimeout(function(){delete b.dataset.armed;b.textContent='Restore from pasted backup';},4000);return;
+    }
+    delete b.dataset.armed;b.textContent='Restore from pasted backup';
+    try{
+      var p=JSON.parse($('b-box').value);
+      if(!p||!Array.isArray(p.games))throw new Error('bad');
+      var games=p.games.filter(function(g){
+        return g&&typeof g.date==='string'&&/^[wld]$/.test(g.result)&&typeof g.after==='number';
+      }).map(function(g,i){
+        return {id:typeof g.id==='number'?g.id:Date.now()+i,date:g.date.slice(0,10),result:g.result,
+          color:g.color==='black'?'black':'white',opening:String(g.opening||'').slice(0,60),after:g.after,
+          reason:REASONS[g.reason]?g.reason:'',time:typeof g.time==='number'?g.time:null,note:String(g.note||'').slice(0,160)};
+      });
+      var st=p.settings||{};
+      S.games=games;
+      S.settings={start:+st.start||S.settings.start,goal:+st.goal||S.settings.goal,daily:+st.daily||0};
+      save();
+      $('s-start').value=S.settings.start;$('s-goal').value=S.settings.goal;$('s-daily').value=S.settings.daily;
+      render();bmsg('Restored '+games.length+' games.');
+    }catch(e){bmsg('That text is not a valid backup. Use "Show backup text" to make one.',true);}
+  });
+
+  /* ---------- theme ---------- */
+  function applyTheme(t){if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}
+  try{applyTheme(localStorage.getItem(THEMEKEY));}catch(e){}
+  $('theme').addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    if(!cur){cur=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
+    var next=cur==='dark'?'light':'dark';
+    applyTheme(next);
+    try{localStorage.setItem(THEMEKEY,next);}catch(e){}
+  });
+
+  /* ---------- init ---------- */
+  load();
+  $('f-date').value=today();
+  bindSetting('s-start','start',100,3500);
+  bindSetting('s-goal','goal',100,3500);
+  bindSetting('s-daily','daily',0,99);
+  render();
+})();
+</script>
+</body>
+</html>
